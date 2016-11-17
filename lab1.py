@@ -1,3 +1,7 @@
+import binascii
+
+from pyspark import SparkConf, SparkContext
+
 #Tested
 def line_hashed_shingle(tokens, k):
 	arr = []
@@ -7,7 +11,7 @@ def line_hashed_shingle(tokens, k):
 		max_i = len(tokens) - k + 1
 
 	for i in range(max_i):
-		arr.append(tokens[i:i+k])
+		arr.append(binascii.crc32(' '.join(tokens[i:i+k])))
 
 	return arr
 
@@ -28,9 +32,12 @@ def make_hashed_shingles(textFile, k):
 
 class Shingling(object):
 
-	def __init__(self, filename, k):
+	def __init__(self, sc, filename, k):
 		self.k = k
 		self.filename = filename
+
+		#conf = SparkConf().setAppName("building a warehouse")
+		#sc = SparkContext(conf=conf)
 
 		textFile = sc.textFile(filename)
 		textFile = textFile.map(lambda x: x.split()).zipWithIndex()
@@ -39,3 +46,6 @@ class Shingling(object):
 
 	def __str__(self):
 		return self.filename + ": " + self.k + "-Shingle"
+
+	def print_all(self):
+		print self.arr
